@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ecommerce Licorería - Paula Herrera</title>
+<style>
+  /* 🎨 PALETA + TIPO PREMIUM */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap');
+
+  :root {
+    --vinotinto: #4b0f21;
+    --gris-fondo: #f5f5f5;
+    --gris-medio: #d9d9d9;
+    --gris-oscuro: #333;
+    --blanco: #ffffff;
+    --beige: #e8e2d6;
+    --acento-verde: #5c7d6a;
+    --acento-azul: #6a8bbd;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--vinotinto);
+    color: var(--blanco);
+    padding: 20px;
+    text-align: center;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* GRID RESPONSIVE */
+  #productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .producto {
+    background: var(--blanco);
+    color: var(--gris-oscuro);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+  }
+
+  .producto:hover {
+    transform: scale(1.03);
+  }
+
+  .producto img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  /* BOTÓN RESPONSIVO */
+  .producto button {
+    width: 100%;
+    background: var(--acento-verde);
+    border: none;
+    color: white;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .producto button:hover {
+    background: #4c6958;
+  }
+
+  /* 🛒 Carrito */
+  .carrito {
+    margin-top: 35px;
+    padding: 20px;
+    background: var(--blanco);
+    color: var(--gris-oscuro);
+    border-radius: 12px;
+    display: inline-block;
+    min-width: 330px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  .btn-finalizar {
+    background-color: var(--acento-azul);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 12px;
+    font-size: 1rem;
+  }
+
+  .btn-finalizar:hover {
+    background-color: #5878a0;
+  }
+</style>
+</head>
+<body>
+
+<h1>🍻 Ecommerce Licorería - Paula Herrera</h1>
+
+<div id="productos"></div>
+
+<div class="carrito">
+  <h2>🧾 Carrito de Compras</h2>
+  <ul id="lista-carrito"></ul>
+  <p><strong>Total: $<span id="total">0.00</span></strong></p>
+  <button class="vaciar" onclick="vaciarCarrito()">🧼 Vaciar Carrito</button>
+</div>
+
+<script>
+const productos = [
+  { id: 1, nombre: "Crema de Whisky Baileys 700ml", precio: 25.00, imagen: "https://www.arflina.com/ProductoImagen/gp1260/2774.jpg" },
+  { id: 2, nombre: "Ron Viejo de Caldas 5 años", precio: 18.00, imagen: "https://mistiendas.com.co/3046-large_default/ron-viejo-de-caldas-5-anos-x375ml.jpg" },
+  { id: 3, nombre: "Aguardiente Rosado del Tolima", precio: 30.00, imagen: "https://img.komercia.store/komercia-store/image/upload/dpr_auto,f_auto,fl_lossy,q_auto/c_crop,g_custom/h_550,w_550,b_auto,c_pad/v1738871930/12380/products/bhgqvitbfhcwyinpvxop.png" },
+  { id: 4, nombre: "Vodka Smirnoff de Lulo", precio: 18.00, imagen: "https://media.surtiplaza.co/dimen/7707096271682.png" },
+  { id: 5, nombre: "Cerveza Rubia Artesanal BBC", precio: 22.00, imagen: "https://s3.amazonaws.com/takami.co/CACHE/images/productimage/4ae930a1b6f7495b90f85ce476a8f6b0/zypuk8b4k2gfok4z6rqyfp/efcbc07479a44648d418c54edb27e503.jpg" }
+];
+
+const carrito = [];
+
+const contenedorProductos = document.getElementById("productos");
+const listaCarrito = document.getElementById("lista-carrito");
+const totalCarrito = document.getElementById("total");
+
+function mostrarProductos() {
+  productos.forEach(prod => {
+    const div = document.createElement("div");
+    div.className = "producto";
+    div.innerHTML = `
+      <img src="${prod.imagen}" alt="${prod.nombre}">
+      <h3>${prod.nombre}</h3>
+      <p>Precio: $${prod.precio.toFixed(2)}</p>
+      <button onclick="agregarAlCarrito(${prod.id})">Agregar al carrito</button>
+    `;
+    contenedorProductos.appendChild(div);
+  });
+}
+
+function agregarAlCarrito(id) {
+  const productoExistente = carrito.find(p => p.id === id);
+  if (productoExistente) {
+    productoExistente.cantidad++;
+  } else {
+    const producto = productos.find(p => p.id === id);
+    carrito.push({ ...producto, cantidad: 1 });
+  }
+  actualizarCarrito();
+}
+
+function actualizarCarrito() {
+  listaCarrito.innerHTML = "";
+  let total = 0;
+  let totalItems = 0;
+
+  carrito.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.nombre} x${item.cantidad} - $${(item.precio * item.cantidad).toFixed(2)}`;
+    listaCarrito.appendChild(li);
+    total += item.precio * item.cantidad;
+    totalItems += item.cantidad;
+  });
+
+  totalCarrito.textContent = total.toFixed(2);
+  actualizarTituloCarrito(totalItems);
+}
+
+function actualizarTituloCarrito(cantidad) {
+  const titulo = document.querySelector(".carrito h2");
+  titulo.textContent = `🧾 Carrito de Compras (${cantidad})`;
+}
+
+function vaciarCarrito() {
+  if (confirm("¿Estás seguro de que quieres vaciar el carrito?")) {
+    carrito.length = 0;
+    actualizarCarrito();
+  }
+}
+
+function finalizarCompra() {
+  if (carrito.length === 0) {
+    alert("El carrito está vacío. Agrega productos antes de finalizar la compra.");
+    return;
+  }
+
+  alert("🎉 ¡Gracias por tu compra! En breve recibirás un correo de confirmación.");
+  carrito.length = 0;
+  actualizarCarrito();
+}
+
+/* Botón Finalizar */
+const botonFinalizar = document.createElement("button");
+botonFinalizar.textContent = "✅ Finalizar Compra";
+botonFinalizar.className = "btn-finalizar";
+botonFinalizar.onclick = finalizarCompra;
+document.querySelector(".carrito").appendChild(botonFinalizar);
+
+mostrarProductos();
+</script>
+
+</body>
+</html>
